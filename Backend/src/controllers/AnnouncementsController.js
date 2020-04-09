@@ -60,19 +60,23 @@ module.exports = {
 
     async update(req, res){
         const {Id_Anuncio, Id_Produto, Quantidade}= req.body;
+        const Id_Prod_Anun = Id_Anuncio+Id_Produto;
 
         try {
             await connection('produtos_anuncios').insert({
-                Id_Anuncio, Id_Produto, Quantidade
+                Id_Prod_Anun, Id_Anuncio, Id_Produto, Quantidade
             });
             console.log("relação criada");
-            return res.json({Id_Anuncio, Title});
+            return res.json({Id_Prod_Anun, Title});
 
         } catch (error) {
             try{
-                await connection('produtos_anuncios').update({
-                    Id_Anuncio, Id_Produto, Quantidade
+                await connection('produtos_anuncios')
+                .where({Id_Prod_Anun: Id_Prod_Anun})
+                .update({
+                     Quantidade:Quantidade
                 });
+                
                 console.log("relação atualizada");
                 return res.json({Id_Anuncio, Title});
             } catch (error) {

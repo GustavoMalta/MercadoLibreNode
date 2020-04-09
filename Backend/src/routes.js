@@ -59,6 +59,9 @@ routes.get('/adverts', AnnouncementsController.index);
 routes.post('/adverts', AnnouncementsController.create);
 routes.put('/advert', AnnouncementsController.update);
 
+
+routes.get('/teste', BusinessController.teste);
+
 routes.get ('/', (req, res)=>{
     return res.json({Hello: "Mundo",
                     Ola:'World'
