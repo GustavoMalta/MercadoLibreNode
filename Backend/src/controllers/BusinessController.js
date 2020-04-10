@@ -3,10 +3,10 @@ const Meli = require('mercadolibre-nodejs');
 const axios = require('axios');
 //var meli = new Meli
 
-const client_id = "647916821";
-const client_secret = "5SrRnp";
-const access_token = "APP_USR-6";
-const refresh_token = "TG-5e8f8";
+const client_id = "64791682
+const client_secret = "5SrRnpfUt3
+const access_token = "APP_USR-6479168213943
+const refresh_token = "TG-5e8f86c34d9583000
 
 
 module.exports = {
@@ -31,6 +31,7 @@ module.exports = {
         
         return res.json(items.data);
     },
+    
     async index(req,res) {
         const {page = 1} = req.query;
 
