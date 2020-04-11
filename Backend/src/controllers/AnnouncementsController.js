@@ -6,8 +6,8 @@ module.exports = {
 
         const [count] = await connection('anuncios')
             .count();
-        res.header('X-Total-Count', count['count(*)']);
-
+        res.header('X-Total-Count', count['count']);
+        
         const test = await connection('anuncios')
         .limit(5)
         .offset((page-1)*5)

@@ -5,6 +5,7 @@ module.exports = {
   development: {
     client: 'postgresql',
     connection: {
+      host : '192.168.1.2',
       database: 'ML_Node',
       user:     'postgres',
       password: 'aqyb829'

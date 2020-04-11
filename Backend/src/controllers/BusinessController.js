@@ -1,35 +1,85 @@
 const connection = require('../database/connection');
 const Meli = require('mercadolibre-nodejs');
+
+const Meli2 = require('mercadolibre');
 const axios = require('axios');
 //var meli = new Meli
-
-const client_id = "64791682
-const client_secret = "5SrRnpfUt3
-const access_token = "APP_USR-6479168213943
-const refresh_token = "TG-5e8f86c34d9583000
 
 
 module.exports = {
     async teste(req,res){
-        var meliObject = new Meli(client_id, client_secret, access_token, refresh_token);
-        console.log("teste abaixo");
-        var itemCode = await meliObject.get(`/users/489980023/items/search`,access_token);
+        const [config] = await connection('config').where('id',1).select('*');
 
+        const [empresa] = await connection('empresas')
+        .where('id',"489980023")
+        .select('*');
+        //console.log(empresa);
+
+     
+        var meliObject = new Meli(config.client_id, config.client_secret, empresa.Access_Token, empresa.Refresh_Token);
+        //console.log(empresa);
+
+        const url = `https://api.mercadolibre.com/oauth/token?grant_type=refresh_token&client_id=${config.client_id}&client_secret=${config.client_secret}&refresh_token=${empresa.Refresh_Token}`
+        var novotoken = await axios.post(url)
+        //console.log(novotoken);
+        await connection('empresas')
+            .where({id: novotoken.data.user_id})
+            .update({
+                Access_Token:novotoken.data.access_token
+            });
+        var itemCode = await meliObject.get(`/users/${empresa.id}/items/search`,empresa.Access_Token);
         itemCode = JSON.stringify(itemCode.results);
         itemCode = itemCode
         .replace('[','')
         .replace(']','')
-        .split('"').join(',')
-        console.log(itemCode);
-        try {
-            var items = await axios.get("https://api.mercadolibre.com/items?ids=" + itemCode);
-        //var items = await meliObject.request("https://api.mercadolibre.com/items\\?ids="+itemCode); // so com o axios para funcionar
-        } catch (error) {
-            console.log(error);
-        }
-        console.log(items.data.body);
+        .replace(/"/g,'')
         
-        return res.json(items.data);
+        var items = await axios.get("https://api.mercadolibre.com/items?ids=" + itemCode);
+        /*var anuns ={};
+        var anun ={};
+        items.data.forEach(item => {
+            anun = {Id_Anuncio: item.body.id,
+                SellerId_Empresa: empresa.id,
+                Title: item.body.title,
+                status: ((item.body.status == "active") ? true : false),
+                Price: item.body.price,
+                Listing_type_id: item.body.listing_type_id,
+                Available_quantity:0,
+                Free_shipping: "NA",
+                Shipping_mode: "NA"
+            };
+            
+
+            try {
+                console.log(anun.Title)
+            } catch (error) {
+                return res.json(error);
+            }
+            
+            anuns += anun;
+        }); */
+        
+    const fieldsToInsert = items.data.map(item =>({
+            Id_Anuncio: item.body.id,   
+            SellerId_Empresa: empresa.id,
+            Title: item.body.title,
+            status: ((item.body.status == "active") ? true : false),
+            Price: item.body.price,
+            Listing_type_id: item.body.listing_type_id,
+            Available_quantity:0,
+            Free_shipping: "NA",
+            Shipping_mode: "NA",
+
+            Free_shipping: ((item.body.status == "active") ?  item.body.shipping.free_shipping : ''),
+            Shipping_mode: ((item.body.status == "active") ?  item.body.shipping.mode : '')
+                  
+            }));
+            
+            await connection('anuncios').insert(fieldsToInsert)
+            .then(() => { console.log("handle success")})
+            .catch((error) => { console.log(error)});
+                return res.json(items.data);
+
     },
     
     async index(req,res) {

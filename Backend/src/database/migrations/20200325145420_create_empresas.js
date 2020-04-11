@@ -6,6 +6,7 @@ exports.up = function(knex) {
        table.string('name', 30).notNullable();
        table.string('Tg_Code', 37).notNullable();
        table.string('Access_Token', 74).notNullable();
+       table.string('Refresh_Token', 74);
        table.timestamp('Date_Expire', 55).notNullable();
     });
 };
