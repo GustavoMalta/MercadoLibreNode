@@ -3,83 +3,36 @@ const Meli = require('mercadolibre-nodejs');
 
 const Meli2 = require('mercadolibre');
 const axios = require('axios');
+const {GetAnuncios} = require('../utils/GetMeliData');
 //var meli = new Meli
 
 
 module.exports = {
     async teste(req,res){
-        const [config] = await connection('config').where('id',1).select('*');
+        const {fieldsToInsert, fieldsToUpdate} = await GetAnuncios();  
+        var MlAanuncios =[];
 
-        const [empresa] = await connection('empresas')
-        .where('id',"489980023")
-        .select('*');
-        //console.log(empresa);
+        if (fieldsToInsert.length>0){
+            await connection('anuncios').insert(fieldsToInsert)
+                .then(() => { console.log("Inseridos com sucesso")})
+                .catch((error) => { console.log('erro na inserção no banco de dados')})
+        };
 
-     
-        var meliObject = new Meli(config.client_id, config.client_secret, empresa.Access_Token, empresa.Refresh_Token);
-        //console.log(empresa);
+        if(fieldsToUpdate.length >0){
+            try{
+                fieldsToUpdate.forEach(async item => {
+                    await connection('anuncios')
+                        .where({Id_Anuncio: item.Id_Anuncio})
+                        .update(item)
+                });
 
-        const url = `https://api.mercadolibre.com/oauth/token?grant_type=refresh_token&client_id=${config.client_id}&client_secret=${config.client_secret}&refresh_token=${empresa.Refresh_Token}`
-        var novotoken = await axios.post(url)
-        //console.log(novotoken);
-        await connection('empresas')
-            .where({id: novotoken.data.user_id})
-            .update({
-                Access_Token:novotoken.data.access_token
-            });
-        var itemCode = await meliObject.get(`/users/${empresa.id}/items/search`,empresa.Access_Token);
-        itemCode = JSON.stringify(itemCode.results);
-        itemCode = itemCode
-        .replace('[','')
-        .replace(']','')
-        .replace(/"/g,'')
-        
-        var items = await axios.get("https://api.mercadolibre.com/items?ids=" + itemCode);
-        /*var anuns ={};
-        var anun ={};
-        items.data.forEach(item => {
-            anun = {Id_Anuncio: item.body.id,
-                SellerId_Empresa: empresa.id,
-                Title: item.body.title,
-                status: ((item.body.status == "active") ? true : false),
-                Price: item.body.price,
-                Listing_type_id: item.body.listing_type_id,
-                Available_quantity:0,
-                Free_shipping: "NA",
-                Shipping_mode: "NA"
-            };
-            
-
-            try {
-                console.log(anun.Title)
             } catch (error) {
-                return res.json(error);
+                return res.json(error)
             }
             
-            anuns += anun;
-        }); */
+        };
         
-    const fieldsToInsert = items.data.map(item =>({
-            Id_Anuncio: item.body.id,   
-            SellerId_Empresa: empresa.id,
-            Title: item.body.title,
-            status: ((item.body.status == "active") ? true : false),
-            Price: item.body.price,
-            Listing_type_id: item.body.listing_type_id,
-            Available_quantity:0,
-            Free_shipping: "NA",
-            Shipping_mode: "NA",
-
-            Free_shipping: ((item.body.status == "active") ?  item.body.shipping.free_shipping : ''),
-            Shipping_mode: ((item.body.status == "active") ?  item.body.shipping.mode : '')
-                  
-            }));
-            
-            await connection('anuncios').insert(fieldsToInsert)
-            .then(() => { console.log("handle success")})
-            .catch((error) => { console.log(error)});
-                return res.json(items.data);
-
+        return res.json(MlAanuncios);
     },
     
     async index(req,res) {
@@ -130,6 +83,6 @@ module.exports = {
             } catch (error) {
                 return res.json(error)
             }
-        },
+        }
     
 }
