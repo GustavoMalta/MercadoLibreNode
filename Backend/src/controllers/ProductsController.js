@@ -16,28 +16,35 @@ module.exports = {
 
         },
 
-    async search(req,res) {
-
-        const businness = await connection('produtos')
-        .where('Id_Produto',req.body.Id_Produto)
+    async edit(req,res) {
+        const { id } = req.params;
+        const produtos = await connection('produtos')
+        .where('Id_Produto',id)
         .select('*');
-
-        console.log(businness);
-        return res.json(businness);
+        
+        console.log(produtos);
+        return res.json(produtos);
 
         },
 
     async create(req,res) {
         /*
-            "Id_Produto": "123",
+            "Id_Produto": "123",  -- gerando automatico
             "Title": "bolsa",
             "Custo": "50.00",
             "Obs": "obs"
         */
        
-        const {Id_Produto, Title, Custo, Obs} = req.body;
+        const {Title, Custo, Obs} = req.body;
         
             try {
+                var [{count}] = await connection('produtos')
+                    .count();
+                res.header('X-Total-Count', ++count);
+                Id_Produto = count;
+                console.log("count: " + count);
+                console.log("idproduto: " + Id_Produto);
+                
                 await connection('produtos').insert({
                     Id_Produto, Title, Custo, Obs
                 });

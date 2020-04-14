@@ -1,39 +1,8 @@
 const connection = require('../database/connection');
-const Meli = require('mercadolibre-nodejs');
 
-const Meli2 = require('mercadolibre');
-const axios = require('axios');
-const {GetAnuncios} = require('../utils/GetMeliData');
-//var meli = new Meli
 
 
 module.exports = {
-    async teste(req,res){
-        const {fieldsToInsert, fieldsToUpdate} = await GetAnuncios();  
-        var MlAanuncios =[];
-
-        if (fieldsToInsert.length>0){
-            await connection('anuncios').insert(fieldsToInsert)
-                .then(() => { console.log("Inseridos com sucesso")})
-                .catch((error) => { console.log('erro na inserção no banco de dados')})
-        };
-
-        if(fieldsToUpdate.length >0){
-            try{
-                fieldsToUpdate.forEach(async item => {
-                    await connection('anuncios')
-                        .where({Id_Anuncio: item.Id_Anuncio})
-                        .update(item)
-                });
-
-            } catch (error) {
-                return res.json(error)
-            }
-            
-        };
-        
-        return res.json(MlAanuncios);
-    },
     
     async index(req,res) {
         const {page = 1} = req.query;

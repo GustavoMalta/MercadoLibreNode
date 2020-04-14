@@ -50,17 +50,19 @@ routes.get('/business', BusinessController.search);
 routes.get('/businesses', BusinessController.index);
 routes.post('/businesses', BusinessController.create);
 
-routes.get('/product', ProductsController.search);
+routes.get('/product', ProductsController.edit);
 routes.get('/products', ProductsController.index);
 routes.post('/products', ProductsController.create);
 
-routes.get('/advert', AnnouncementsController.search);
+routes.get('/advert', AnnouncementsController.edit);
+routes.get('/advert/:id', AnnouncementsController.edit);
 routes.get('/adverts', AnnouncementsController.index);
+routes.get('/adverts/:id_seller', AnnouncementsController.index);
 routes.post('/adverts', AnnouncementsController.create);
-routes.put('/advert', AnnouncementsController.update);
+routes.put('/advert/:id', AnnouncementsController.update);
 
 
-routes.get('/teste', BusinessController.teste);
+routes.get('/getAnnoucements/:id', AnnouncementsController.getAnnoucements);
 
 routes.get ('/', (req, res)=>{
     return res.json({Hello: "Mundo",
